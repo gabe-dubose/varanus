@@ -210,5 +210,39 @@ def get_intron_variant_annotation():
     pass
 
 #Function to get intergenic variant annotation
-def get_intergenic_variant_annotation():
-    pass
+def get_intergenic_variant_annotation(upstream_gene, downstream_gene, variant_position):
+
+    variant_annotation = []
+    
+    #intergenic variant annotation parent
+    #intergenic_1kb_variant annotation
+    if downstream_gene != 'NA':
+        if downstream_gene[0] - upstream_gene[1] <= 1000:
+            variant_annotation.append(['intergenic_variant','intergenic_1kb_variant'])
+    
+    #upstream_gene_variant annotation parent
+    #5KB_upstream_variant annotation
+    if downstream_gene != 'NA':
+        if downstream_gene[0] - variant_position <= 5000 and downstream_gene[0] - variant_position > 2000:
+            variant_annotation.append(['intergenic_variant', 'upstream_gene_variant' ,'5KB_upstream_variant'])
+        #2KB_upstream_variant annotation
+        elif downstream_gene[0] - variant_position <= 2000:
+            variant_annotation.append(['intergenic_variant', 'upstream_gene_variant' ,'2KB_upstream_variant'])
+        #upstream_gene_variant annotation
+        else:
+            variant_annotation.append(['intergenic_variant', 'upstream_gene_variant'])
+        
+    #downstream_gene_variant annotaion parent
+    #5KB_downstream_variant annotation
+    if variant_position - upstream_gene[1] <= 5000 and variant_position - upstream_gene[0] > 2000:
+        variant_annotation.append(['intergenic_variant', 'downstream_gene_variant', '5KB_downstream_variant'])
+    #2KB_downstream_variant annotaion
+    elif variant_position - upstream_gene[1] <= 2000 and variant_position - upstream_gene[0] > 500:
+        variant_annotation.append(['intergenic_variant', 'downstream_gene_variant', '2KB_downstream_variant'])
+    #500B_downstream_variant annotation
+    elif variant_position - upstream_gene[1] <= 500:
+        variant_annotation.append(['intergenic_variant', 'downstream_gene_variant', '500B_downstream_variant'])
+    else:
+        variant_annotation.append(['intergenic_variant', 'downstream_gene_variant'])
+
+    return variant_annotation
