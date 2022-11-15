@@ -1,4 +1,6 @@
 
+import re
+import varanus.defaults
 #Function to find the feature ID from a given info field
 # Function takes an info field (string) and a list of regular expressions formatted as:
 #   regular_expressions = [primary_search_term, trim_term1, trim_term2,...]
@@ -7,8 +9,7 @@
 # characters will need to be provided to provide a unique enough pattern to reliably perform
 # this pattern mathcing. Therefore, the remaining expressions in the list are used to trim excess
 # characters that were used for pattern mathching, but not actually part of the feature ID. 
-def get_feature_id(info_field, regular_expressions, feature_type, feature_start, feature_stop):
-    import re
+def get_feature_id(info_field, feature_type, feature_start, feature_stop, regular_expressions = varanus.defaults.default_info_search_terms['feature_id_terms']):
 
     feature_id = re.search(regular_expressions[0], info_field)
     if bool(feature_id) == True:
@@ -22,24 +23,62 @@ def get_feature_id(info_field, regular_expressions, feature_type, feature_start,
 
 #Function to find the parent ID from a given info field
 # This function works the same way as the 'get_feature_id' function
-def get_parent_id(info_field, regular_expressions):
-    import re
+def get_parent_id(info_field, regular_expressions = varanus.defaults.default_info_search_terms['parent_id_terms']):
     
     parent_id = re.search(regular_expressions[0], info_field)
     if bool(parent_id) == True:
         parent_id = parent_id.group()
         for trim_term in regular_expressions[1:]:
             parent_id = re.sub(trim_term, '', parent_id)
-        return parent_id
     else:
-        return None
+        parent_id = 'NA'
+    return parent_id
 
-#Function to add raw feature data dictionary
-def add_raw_data(raw_features_data_dict, chromosome, feature_id, feature_type, feature_start, feature_stop, feature_strand, feature_phase):
+#function to get gene name
+def get_gene_name(info_field, regular_expressions = varanus.defaults.default_info_search_terms['gene_name_terms']):
+    gene_name = re.search(regular_expressions[0], info_field)
+    if bool(gene_name) == True:
+        gene_name = gene_name.group()
+        for trim_term in regular_expressions[1:]:
+            gene_name = re.sub(trim_term, '', gene_name)
+    else:
+        gene_name = 'NA'
+    return gene_name
+
+#function to get protein product
+def get_protein_product(info_field, regular_expressions = varanus.defaults.default_info_search_terms['protein_product_terms']):
+    protein_product = re.search(regular_expressions[0], info_field)
+    if bool(protein_product) == True:
+        protein_product = protein_product.group()
+        for trim_term in regular_expressions[1:]:
+            protein_product = re.sub(trim_term, '', protein_product)
+    else:
+        protein_product = 'NA'
+    return protein_product
+
+#function to get locus tag
+def get_locus_tag(info_field, regular_expressions = varanus.defaults.default_info_search_terms['locus_tag_terms']):
+    locus_tag = re.search(regular_expressions[0], info_field)
+    if bool(locus_tag) == True:
+        locus_tag = locus_tag.group()
+        for trim_term in regular_expressions[1:]:
+            locus_tag = re.sub(trim_term, '', locus_tag)
+    else:
+        locus_tag = 'NA'
+    return locus_tag  
+
+#function to add raw feature data dictionary
+def add_raw_data(raw_features_data_dict, chromosome, feature_id, feature_type, feature_start, feature_stop, feature_strand, feature_phase, info_field):
+
+    #attempt to get additional info fields
+    gene_name = get_gene_name(info_field)
+    protein_product = get_protein_product(info_field)
+    locus_tag = get_locus_tag(info_field)
+
     if chromosome not in raw_features_data_dict:
         raw_features_data_dict[chromosome] = {}
     if feature_id not in raw_features_data_dict[chromosome]:
-        raw_features_data_dict[chromosome][feature_id] = [feature_type, feature_start, feature_stop, feature_strand, feature_phase]
+        raw_features_data_dict[chromosome][feature_id] = [feature_type, feature_start, feature_stop, feature_strand, feature_phase, [gene_name, protein_product, locus_tag]]
 
 #Function to add feature information to feature type data dictionary.
 # Dictionary is structured as:

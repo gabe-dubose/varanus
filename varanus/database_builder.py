@@ -1,3 +1,6 @@
+import varanus.defaults
+import varanus.database_build_utils
+import bisect
 #A function to build a features database from a GFF3 file to be used for variant annotation 
 # This function is specifically for gff3 files because they include parent-child relationships
 # between features, which is necessary to build the features heirarchy. This heirarchy contains 
@@ -34,9 +37,6 @@
 # which I might get back to later. 
 
 def build_gff3_database(features_file):
-    import varanus.defaults
-    import varanus.database_build_utils
-    import bisect
 
     raw_features_data = {}
     features_heirarchy = {}
@@ -57,10 +57,10 @@ def build_gff3_database(features_file):
             feature_phase = line.split('\t')[7]
             info_field = line.split('\t')[8]
 
-            feature_id = varanus.database_build_utils.get_feature_id(info_field, varanus.defaults.feature_id_regex_terms, feature_type, feature_start, feature_stop)
+            feature_id = varanus.database_build_utils.get_feature_id(info_field, feature_type, feature_start, feature_stop)
 
             #add to raw data
-            varanus.database_build_utils.add_raw_data(raw_features_data, chromosome, feature_id, feature_type, feature_start, feature_stop, feature_strand, feature_phase)
+            varanus.database_build_utils.add_raw_data(raw_features_data, chromosome, feature_id, feature_type, feature_start, feature_stop, feature_strand, feature_phase, info_field)
 
             #add to features heirarchy
             parent_id = varanus.database_build_utils.get_parent_id(info_field, varanus.defaults.parent_id_regex_terms)

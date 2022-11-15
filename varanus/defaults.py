@@ -6,6 +6,20 @@ feature_id_regex_terms = ['ID=.*?;', 'ID=', ';']
 #default parent_id regex terms
 parent_id_regex_terms = ['Parent=.*?;', 'Parent=', ';']
 
+#default gene name regex terms
+gene_name_regex_terms = ['gene=.*?;', 'gene=', ';']
+
+#default protein product regex terms
+protein_product_regex_terms = ['product=.*?;', 'product=', ';']
+
+#default locus tag regex terms
+locus_tag_regex_terms = ['locus_tag=.*?;', 'locus_tag=', ';']
+
+#Total default regex terms
+default_info_search_terms = {'feature_id_terms' : feature_id_regex_terms, 
+    'parent_id_terms' : parent_id_regex_terms, 'gene_name_terms' : gene_name_regex_terms,
+    'protein_product_terms' : protein_product_regex_terms, 'locus_tag_terms' : locus_tag_regex_terms}
+
 #standard codon table structured as:
 #    standard_codon_table = {'CODON' : ['AMINO_ACID', 'BIOCHEMISTRY', 'INFO']...}
 standard_codon_table = {'TTT': ['PHE', 'AROMATIC_R_GROUP', 'NA'], 'TTC': ['PHE', 'AROMATIC_R_GROUP', 'NA'], 
