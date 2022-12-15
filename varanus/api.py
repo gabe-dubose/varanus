@@ -37,3 +37,23 @@ def read_codon_table(codon_table):
 def annotate_variants(variants, database, genome, codon_table = varanus.defaults.standard_codon_table):
     variant_annotations = varanus.variant_annotator.annotate_variants(variants, database, genome, codon_table)
     return variant_annotations
+
+#function to write variant annotations to file
+def write_annotations(annotaitons, outfile, outfmt=None):
+
+    #find approproate file format
+    try:
+        file_extension = outfile.split('.')[-1]
+    except:
+        file_extension = None
+
+    #delimited format options
+    #write tab separated values
+    if file_extension == 'tsv' and outfmt == 'tsv' or outfmt == 'tsv' or outfmt == None and file_extension == 'tsv':
+        sep = '\t'
+        varanus.file_writer.write_annotations_delimited(annotaitons, outfile, sep)
+    
+    #write comma separated values
+    elif file_extension == 'csv' and outfmt == 'csv' or outfmt == 'csv' or outfmt == None and file_extension == 'csv':
+        sep = ','
+        varanus.file_writer.write_annotations_delimited(annotaitons, outfile, sep)

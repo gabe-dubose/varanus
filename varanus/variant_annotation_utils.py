@@ -213,6 +213,7 @@ def get_intron_variant_annotation():
 def get_intergenic_variant_annotation(upstream_gene, downstream_gene, variant_position):
 
     variant_annotation = []
+    warning_messages = []
     
     #intergenic variant annotation parent
     #intergenic_1kb_variant annotation
@@ -244,5 +245,9 @@ def get_intergenic_variant_annotation(upstream_gene, downstream_gene, variant_po
         variant_annotation.append(['intergenic_variant', 'downstream_gene_variant', '500B_downstream_variant'])
     else:
         variant_annotation.append(['intergenic_variant', 'downstream_gene_variant'])
+    
+    #general intergenic annotation
+    if len(variant_annotation) == 0:
+        variant_annotation.append(['intergenic_variant'])
 
     return variant_annotation

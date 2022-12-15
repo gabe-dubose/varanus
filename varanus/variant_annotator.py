@@ -133,28 +133,29 @@ def annotate_variants(variants_information, features_database, genome, codon_tab
         try:
         #if variant is not in a gene, variant is intergenic
             if 'gene' not in variant_attributes[1]:
-
-                gene_features = features_database['features_type_data'][variant_chromosome]['gene']
-                position_in_features = bisect.bisect_left(gene_features, [variant_position, ])
-
-                #get upstream and downstream genes if feature is intergenic
-                try:
-                    upstream_gene = gene_features[position_in_features-1]
-                except:
-                    upstream_gene = 'NA'
-                
-                try:
-                    downstream_gene = gene_features[position_in_features]
-                except:
-                    upstream_gene = ''
-                
-                intergenic_annotation = varanus.variant_annotation_utils.get_intergenic_variant_annotation(upstream_gene, downstream_gene, variant_position)
-                #print(f"intergenic:{upstream_gene}\t{downstream_gene}")
-
                 variant_attributes[1].extend(['intergenic'])
                 variant_attributes[0].extend(['No_features'])
-                variant_attributes[4].append([intergenic_annotation])
-                #variant_annotation_utils.get_intergenic_variant_annotation()
+
+                try:
+                    gene_features = features_database['features_type_data'][variant_chromosome]['gene']
+                    position_in_features = bisect.bisect_left(gene_features, [variant_position, ])
+
+                    #get upstream and downstream genes if feature is intergenic
+                    try:
+                        upstream_gene = gene_features[position_in_features-1]
+                    except:
+                        upstream_gene = 'NA'
+                    
+                    try:
+                        downstream_gene = gene_features[position_in_features]
+                    except:
+                        upstream_gene = ''
+                    
+                    intergenic_annotation = varanus.variant_annotation_utils.get_intergenic_variant_annotation(upstream_gene, downstream_gene, variant_position)
+
+                    variant_attributes[4].extend([intergenic_annotation])
+                except:
+                    variant_attributes[4].extend(['intergenic_no_annotation'])
         except:
             pass
             
@@ -212,7 +213,7 @@ def annotate_variants(variants_information, features_database, genome, codon_tab
         if 'CDS' in variant_attributes[1]:
             #if reference codon and alternative codon are complete codon(s) (sets of 3), add their amino acid changes
             if len(variant_attributes[3][0][0]) % 3 == 0 and len(variant_attributes[3][1][0]) % 3 == 0:
-                amino_acid_change = f"{variant_attributes[3][0][1]}{variant_attributes[3][2][2]}{variant_attributes[3][1][0]}"
+                amino_acid_change = f"{variant_attributes[3][0][1]}{variant_attributes[3][2][2]}{variant_attributes[3][1][1]}"
                 annotations[variant_chromosome][str(variant_position)][variant_key].append([amino_acid_change])
         else:
             annotations[variant_chromosome][str(variant_position)][variant_key].append(['NA'])
