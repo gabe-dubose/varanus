@@ -89,17 +89,29 @@ def annotate_variants(variants_information, features_database, genome, codon_tab
                         variant_attributes[1].extend(['exon', 'mRNA', 'gene'])
                         feature_heirarchy = features_database['features_heirarchy'][variant_chromosome][feature_id]
                         variant_attributes[2].extend(feature_heirarchy)
-                        
-                        immediate_parent = feature_heirarchy[-1]
-                        immediate_parent_features = features_database['features_order'][immediate_parent]['Exons']
-                        for i in range(len(immediate_parent_features)):
-                            if feature_id in immediate_parent_features[i] and variant_position > immediate_parent_features[i][0] and variant_position < immediate_parent_features[i][1]:
-                                feature_position_in_parent = [i, len(immediate_parent_features)]
+                    
+                        #if variant is not in a coding sequence but is in an exon, variant is likely in the UTR
+                        #to confirm, check if variant is in the first exon (5 UTR) or last exon (3 UTR)
 
-                        #if variant is not in CDS but is in an exon, variant is likely an UTR variant; therefore, codon information is not needed
-                        # if variant is in a UTR, whether it is a 5_UTR or 3_UTR variant is determined based on the feature_position_in_parent parameter
-                        
-        #skip is variant is not in an exon
+                        #get the parent mRNA
+                        immediate_parent = feature_heirarchy[-1]
+                        #get the order of the exons in the parent mRNA
+                        immediate_parent_exons = features_database['features_order'][immediate_parent]['Exons']
+
+                        for exon in immediate_parent_exons:
+
+                            exon_start = exon[0]
+                            exon_stop = exon[1]
+                            exon_position = immediate_parent_exons.index(exon)
+                            
+                            #if variant is before first exon
+                            if variant_position < exon_start and exon_position == 0:
+                                utr_region = '5_prime'
+                                variant_attributes[1].extend(['5_UTR'])
+                            elif variant_position > exon_stop and exon_position == len(immediate_parent_exons)-1:
+                                variant_attributes[1].extend(['3_UTR'])
+      
+        #skip if exon is not found
         except:
             pass
 
@@ -114,6 +126,29 @@ def annotate_variants(variants_information, features_database, genome, codon_tab
                         feature_id = mRNA_features[mRNA_placement-1][2]
                         variant_attributes[1].extend(['mRNA', 'gene'])
                         variant_attributes[0].extend([feature_id])
+                        feature_heirarchy = features_database['features_heirarchy'][variant_chromosome][feature_id]
+                        variant_attributes[2].extend(feature_heirarchy)
+
+                        #if variant is in an mRNA but not an exon, it is likely in an untranslated region.
+                        
+                        #To identify if variant is in a 5 prime UTR or a 3 prime UTR: see if the variant position is 
+                        # before the first exon or after the last exon
+
+                        #query mRNA id against features_order dictionary to get a list of lists in order by feature start
+                        mRNA_features_ordered = features_database['features_order'][feature_id]['Exons']
+                        #identify if variant position is before the first exon (5_UTR) or after the last exon (3_UTR)
+                        for exon_feature in mRNA_features_ordered:
+                            exon_start = exon_feature[0]
+                            exon_stop = exon_feature[1]
+                            exon_position = mRNA_features_ordered.index(exon_feature)
+                            #if variant position is before of the first exon
+                            if variant_position < exon_start and exon_position == 0:
+                                utr_region = 'five_prime'
+                                variant_attributes[1].extend(['5_UTR'])
+                            #if variant position is after last exon
+                            elif variant_position > exon_stop and exon_position == len(mRNA_features_ordered)-1:
+                                variant_attributes[1].extend(['3_UTR'])
+
         except:
             pass
 
@@ -195,6 +230,13 @@ def annotate_variants(variants_information, features_database, genome, codon_tab
                         variant_attributes[0].extend([feature_id])
             except:
                 pass
+
+        #if variant is not on CDS or Exon, identify if it is in an intron
+        if len(variant_attributes[1]) == 2 and 'mRNA' in variant_attributes[1] and 'gene' in variant_attributes[1]:
+            variant_attributes[1].extend(['intron'])
+            intron_variant_annotation = varanus.variant_annotation_utils.get_intron_variant_annotation()
+            variant_attributes[4].extend([intron_variant_annotation])
+            
 
         #set up dictonary
         if variant_chromosome not in annotations:

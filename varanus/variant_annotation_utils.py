@@ -202,18 +202,25 @@ def get_cds_variant_annotation(variant_attributes, feature_position_in_parent):
 
 
 #Function to get UTR variant annotation
-def get_utr_variant_annotation():
-    pass
+def get_utr_variant_annotation(utr_region):
+    variant_annotation = []
+
+    if utr_region == 'five_prime':
+        variant_annotation.append('5_UTR_variant')
+    elif utr_region == 'three_prime':
+        variant_annotation.append('3_UTR_variant')
+    
+    return variant_annotation
 
 #Function to get intron variant annotation
 def get_intron_variant_annotation():
-    pass
+    variant_annotation = ['intron_variant']
+    return variant_annotation
 
 #Function to get intergenic variant annotation
 def get_intergenic_variant_annotation(upstream_gene, downstream_gene, variant_position):
 
     variant_annotation = []
-    warning_messages = []
     
     #intergenic variant annotation parent
     #intergenic_1kb_variant annotation
