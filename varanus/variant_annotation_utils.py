@@ -12,7 +12,7 @@ def get_cds_information(genome, chromosome, variant_position, variant_sequence, 
 
     position_in_feature = variant_position - feature_start + 1
     codon_position = math.ceil(position_in_feature/3)
-    position_in_codon = position_in_feature%3 + 1
+    position_in_codon = position_in_feature%3
 
     #get reference codon based on the position of the variant in its chromosome
     if position_in_codon == 1:
@@ -25,7 +25,7 @@ def get_cds_information(genome, chromosome, variant_position, variant_sequence, 
         #check to make sure reference from VCF matches reference found in genome file
         if reference_codon[1] != reference_sequence:
             warning_messages.append(f"Warning: Reference sequence from VCF '{reference_sequence}' does not match reference sequence found in genome '{reference_codon[1]}'")
-    elif position_in_codon == 3:
+    elif position_in_codon == 0:
         reference_codon = str(genome[chromosome][variant_position-3:variant_position]).upper()
         #check to make sure reference from VCF matches reference found in genome file
         if reference_codon[2] != reference_sequence:
@@ -45,10 +45,13 @@ def get_cds_information(genome, chromosome, variant_position, variant_sequence, 
 
     #assemble reference information
     reference_information = [reference_codon, reference_amino_acid, reference_biochemistry, reference_start_stop_bool]
-
     #get alternative codon, amino acid, biochemistry, and start/stop information
-    replacement_position = position_in_codon - 1
-    alternative_codon = reference_codon[:replacement_position] + variant_sequence +  reference_codon[replacement_position+1:]
+    if position_in_codon == 1 or position_in_codon == 2:
+        replacement_position = position_in_codon - 1
+        alternative_codon = reference_codon[:replacement_position] + variant_sequence +  reference_codon[replacement_position+1:]
+    elif position_in_codon == 0:
+        replacement_position = 2
+        alternative_codon = reference_codon[:replacement_position] + variant_sequence
 
     #if variant is not insertion or deletion, get alternative information
     if len(alternative_codon) == len(reference_codon):

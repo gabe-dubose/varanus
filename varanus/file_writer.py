@@ -11,6 +11,7 @@ def write_database_file(database, filename):
 #Annotation lines are returned as: chromosme, position, variant, amino acid change, feature id, feature types, feature heirarchy, annotations->
 def write_annotations_delimited(variant_annotations, outfile, delimiter):
     with open(outfile, 'a') as outfile:
+        outfile.write(f"chromome{delimiter}position{delimiter}variant{delimiter}amino_acid_change{delimiter}feature_types{delimiter}feature_id{delimiter}features_heirarchy{delimiter}annotation->\n")
         for chromosome in variant_annotations:
             for position in variant_annotations[chromosome]:
                 for variant in variant_annotations[chromosome][position]:

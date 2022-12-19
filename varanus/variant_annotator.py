@@ -255,7 +255,7 @@ def annotate_variants(variants_information, features_database, genome, codon_tab
         if 'CDS' in variant_attributes[1]:
             #if reference codon and alternative codon are complete codon(s) (sets of 3), add their amino acid changes
             if len(variant_attributes[3][0][0]) % 3 == 0 and len(variant_attributes[3][1][0]) % 3 == 0:
-                amino_acid_change = f"{variant_attributes[3][0][1]}{variant_attributes[3][2][2]}{variant_attributes[3][1][1]}"
+                amino_acid_change = f"{variant_attributes[3][0][1]}{variant_attributes[3][2][3]}{variant_attributes[3][1][1]}"
                 annotations[variant_chromosome][str(variant_position)][variant_key].append([amino_acid_change])
         else:
             annotations[variant_chromosome][str(variant_position)][variant_key].append(['NA'])
