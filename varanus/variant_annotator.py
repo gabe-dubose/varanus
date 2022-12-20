@@ -41,8 +41,15 @@ def annotate_variants(variants_information, features_database, genome, codon_tab
 
                     #get and add feature heirarchy information
                     feature_heirarchy = features_database['features_heirarchy'][variant_chromosome][feature_id]
+                    immediate_parent = feature_heirarchy[-1]
                     variant_attributes[2].extend(feature_heirarchy)
-                     
+                    #in some cases, a CDS can come from multiple different parent. Therefore, jsut grab one parent
+                    #and get the rest of the heirarchy (the extended heirarchy will be the same for both parents)
+                    if ',' in immediate_parent:
+                        first_parent = immediate_parent.split(',')[0]
+                        extended_heirarchy = features_database['features_heirarchy'][variant_chromosome][first_parent]
+                        variant_attributes[2].extend(extended_heirarchy)
+
                     #the overall parent of the feature is the first item in the returned heirarchy list, and the 
                     #immediate parent in the last item.
 

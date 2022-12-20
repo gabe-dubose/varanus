@@ -44,7 +44,9 @@ def write_annotations_delimited(variant_annotations, outfile, delimiter):
                         features_heirarchy = ":".join(features_heirarchy)
                     else:
                         features_heirarchy = 'NA:no_heirarchy'
-
+                    if ',' in features_heirarchy:
+                        features_heirarchy = features_heirarchy.replace(',', '|')
+                        
                     #assemble annotation field
                     try:
                         annotation_field = []
