@@ -4,7 +4,7 @@ def annotate_variants(variants_information, features_database, genome, codon_tab
     import varanus.variant_annotation_utils
 
     #overall annotations are returned as a dictionary structured as: 
-        # annotations = {'Chromosome' : {'Position' : {reference>alternative : [[annotations], [nucleotide_change], [amino_acid_change], [feature_id], [feature_types], [feature_heirarchy]]}}}
+        # annotations = {'Chromosome' : {'Position' : {reference>alternative : [[annotations], [nucleotide_change], [amino_acid_change], [feature_id], [feature_types], [feature_heirarchy], [grand_position]]}}}
     annotations = {}
 
     for variant in variants_information:
@@ -50,16 +50,10 @@ def annotate_variants(variants_information, features_database, genome, codon_tab
                         extended_heirarchy = features_database['features_heirarchy'][variant_chromosome][first_parent]
                         variant_attributes[2].extend(extended_heirarchy)
 
-                    #the overall parent of the feature is the first item in the returned heirarchy list, and the 
-                    #immediate parent in the last item.
-
-                    #####Note: need to get "position_in_gene" parameter#######
-
                     #coding sequences that combine to form a protein product should be grouped together
                     #under the same parent, and their order is stored in the "features_order" section
                     #of the features databae. Therefore, the position of the coding sequence can be obtained
                     #by querrying the immediate parent id against the feature order dictionary. 
-                    immediate_parent = feature_heirarchy[-1]
                     immediate_parent_features = features_database['features_order'][immediate_parent]['CDS']
                     #Find feature ID feature parent (make sure feature ID matches and variant is between start and stop)
                     #This is necessary to annotate start codon variants (i.e., need to location with coding sequence is first)
@@ -172,6 +166,20 @@ def annotate_variants(variants_information, features_database, genome, codon_tab
         except:
             pass
 
+        #if variant is in a CDS, exon, or mRNA, try to find its position in the gene
+        #note: Need to adjut to if it is just in a gene at all
+        if 'CDS' in variant_attributes[1] or 'exon' in variant_attributes[1] or 'mRNA' in variant_attributes[1]:
+            try:
+                grand_feature = variant_attributes[2][-1]
+                grand_feature_information = features_database['raw_features_data'][variant_chromosome][grand_feature]
+                grand_feature_start = grand_feature_information[1]
+                grand_feature_stop = grand_feature_information[2]
+                variant_grand_position = variant_position - grand_feature_start + 1
+            except:
+                variant_grand_position = 'NA'
+        else:
+            variant_grand_position = 'NA'
+
         try:
         #if variant is not in a gene, variant is intergenic
             if 'gene' not in variant_attributes[1]:
@@ -273,5 +281,8 @@ def annotate_variants(variants_information, features_database, genome, codon_tab
         annotations[variant_chromosome][str(variant_position)][variant_key].append(variant_attributes[1])
         #add feature heirarchy
         annotations[variant_chromosome][str(variant_position)][variant_key].append(variant_attributes[2])
+        #add grand position
+        annotations[variant_chromosome][str(variant_position)][variant_key].append(variant_grand_position)
+
 
     return annotations

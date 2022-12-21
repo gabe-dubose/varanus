@@ -7,7 +7,7 @@ def write_database_file(database, filename):
         json.dump(database, outfile)
 
 #function to write variant annotation to csv file
-#Note: annotations = {'Chromosome' : {'Position' : {reference>alternative : [[annotations], [nucleotide_change], [amino_acid_change], [feature_types], [feature_id], [feature_heirarchy]]}}}
+#Note: annotations = {'Chromosome' : {'Position' : {reference>alternative : [[annotations], [nucleotide_change], [amino_acid_change], [feature_types], [feature_id], [feature_heirarchy], grand_position]}}}
 #Annotation lines are returned as: chromosme, position, variant, amino acid change, feature id, feature types, feature heirarchy, annotations->
 def write_annotations_delimited(variant_annotations, outfile, delimiter):
     with open(outfile, 'a') as outfile:
@@ -17,6 +17,13 @@ def write_annotations_delimited(variant_annotations, outfile, delimiter):
                 for variant in variant_annotations[chromosome][position]:
                     annotation_info = variant_annotations[chromosome][position][variant]
                     
+                    #assemble nucleotide change filed
+                    variant_position_in_gene = annotation_info[6]
+                    if variant_position_in_gene != 'NA':
+                        nucleotide_variant_field = f"{variant_position_in_gene}{variant}"
+                    else:
+                        nucleotide_variant_field = f"{position}{variant}"
+
                     #assemble amino acid change field
                     if annotation_info[2][0] == 'NA':
                         amino_acid_change = 'NA:non_coding'
@@ -62,5 +69,5 @@ def write_annotations_delimited(variant_annotations, outfile, delimiter):
                         annotation_field = 'NA:no_additional_annotations'
 
                     #assmeble and write annotation line
-                    annotation_line = f"{chromosome}{delimiter}{position}{delimiter}{variant}{delimiter}{amino_acid_change}{delimiter}{feature_types}{delimiter}{feature_id}{delimiter}{features_heirarchy}{delimiter}{annotation_field}"
+                    annotation_line = f"{chromosome}{delimiter}{position}{delimiter}{nucleotide_variant_field}{delimiter}{amino_acid_change}{delimiter}{feature_types}{delimiter}{feature_id}{delimiter}{features_heirarchy}{delimiter}{annotation_field}"
                     outfile.write(f"{annotation_line}\n")
