@@ -43,12 +43,23 @@ def annotate_variants(variants_information, features_database, genome, codon_tab
                     feature_heirarchy = features_database['features_heirarchy'][variant_chromosome][feature_id]
                     immediate_parent = feature_heirarchy[-1]
                     variant_attributes[2].extend(feature_heirarchy)
-                    #in some cases, a CDS can come from multiple different parent. Therefore, jsut grab one parent
+                    #in some cases, a CDS can come from multiple different parent. Therefore, just grab one parent
                     #and get the rest of the heirarchy (the extended heirarchy will be the same for both parents)
                     if ',' in immediate_parent:
                         first_parent = immediate_parent.split(',')[0]
                         extended_heirarchy = features_database['features_heirarchy'][variant_chromosome][first_parent]
                         variant_attributes[2].extend(extended_heirarchy)
+
+                    #in some cases, the gff3 file might not be in order by feature start position. This can cause some features
+                    #to not be linked with their parents. Therefore, try to search of the remaining heirarchy:
+                    try:
+                        extended_heirarchy = features_database['features_heirarchy'][variant_chromosome][immediate_parent]
+                        if len(extended_heirarchy) != 0:
+                            for feature in extended_heirarchy:
+                                if feature != 'NA':
+                                    variant_attributes[2].extend([feature])
+                    except:
+                        pass
 
                     #coding sequences that combine to form a protein product should be grouped together
                     #under the same parent, and their order is stored in the "features_order" section
@@ -168,7 +179,7 @@ def annotate_variants(variants_information, features_database, genome, codon_tab
 
         #if variant is in a CDS, exon, or mRNA, try to find its position in the gene
         #note: Need to adjut to if it is just in a gene at all
-        if 'CDS' in variant_attributes[1] or 'exon' in variant_attributes[1] or 'mRNA' in variant_attributes[1]:
+        if 'gene' in variant_attributes[1]:
             try:
                 grand_feature = variant_attributes[2][-1]
                 grand_feature_information = features_database['raw_features_data'][variant_chromosome][grand_feature]
@@ -248,7 +259,7 @@ def annotate_variants(variants_information, features_database, genome, codon_tab
 
         #if variant is not on CDS or Exon, identify if it is in an intron
         if len(variant_attributes[1]) == 2 and 'mRNA' in variant_attributes[1] and 'gene' in variant_attributes[1]:
-            variant_attributes[1].extend(['intron'])
+            variant_attributes[1].extend(['intron', 'gene'])
             intron_variant_annotation = varanus.variant_annotation_utils.get_intron_variant_annotation()
             variant_attributes[4].extend([intron_variant_annotation])
             

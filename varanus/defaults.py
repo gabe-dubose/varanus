@@ -4,7 +4,7 @@
 feature_id_regex_terms = ['ID=.*?;', 'ID=', ';']
 
 #default parent_id regex terms
-parent_id_regex_terms = ['Parent=.*?;', 'Parent=', ';']
+parent_id_regex_terms = ['Parent=.*?;|Parent=.*?\n', 'Parent=', ';', '\n']
 
 #default gene name regex terms
 gene_name_regex_terms = ['gene=.*?;', 'gene=', ';']

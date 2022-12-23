@@ -29,7 +29,8 @@ def get_parent_id(info_field, regular_expressions = varanus.defaults.default_inf
     if bool(parent_id) == True:
         parent_id = parent_id.group()
         for trim_term in regular_expressions[1:]:
-            parent_id = re.sub(trim_term, '', parent_id)
+            if trim_term in parent_id:
+                parent_id = re.sub(trim_term, '', parent_id)
     else:
         parent_id = 'NA'
     return parent_id
